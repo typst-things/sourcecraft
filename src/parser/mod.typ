@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Parser Orchestrator
+// classcraft — Parser Orchestrator
 // =============================================================================
 // Routes source text through the appropriate grammar parser.
 

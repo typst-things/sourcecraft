@@ -1,7 +1,7 @@
 // =============================================================================
-// source-to-class-diagram — Main Entry Point
+// classcraft — Main Entry Point
 // =============================================================================
-// Public API for the source-to-class-diagram package.
+// Public API for the classcraft package.
 // Provides both show-rule based (code fences) and function-based APIs.
 
 #import "deps.typ": cetz

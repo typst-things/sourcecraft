@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Parser Utilities
+// classcraft — Parser Utilities
 // =============================================================================
 // Shared string-parsing helpers used by all grammars.
 

@@ -1,8 +1,8 @@
 // =============================================================================
-// source-to-class-diagram — Manual
+// classcraft — Manual
 // =============================================================================
 
-#import "@preview/source-to-class-diagram:0.1.0": class-diagram, setup-classuml
+#import "@preview/classcraft:0.1.0": class-diagram, setup-classuml
 
 #set page(paper: "a4", margin: (x: 2cm, y: 2.5cm))
 #set text(font: "Segoe UI", size: 11pt)
@@ -31,7 +31,7 @@
 // Capa
 #align(center)[
   #v(6em)
-  #text(size: 28pt, weight: "bold")[source-to-class-diagram]
+  #text(size: 28pt, weight: "bold")[classcraft]
   #v(0.6em)
   #text(size: 14pt, fill: luma(60))[
     Geração de Diagramas de Classe UML a partir de código-fonte
@@ -49,7 +49,7 @@
 // ===========================================================================
 = Visão Geral
 
-*source-to-class-diagram* é um pacote Typst que gera diagramas de classe UML diretamente
+*classcraft* é um pacote Typst que gera diagramas de classe UML diretamente
 de código-fonte Java ou C\#, sem necessidade de notação PlantUML ou DDL
 específica. O pacote:
 
@@ -67,7 +67,7 @@ específica. O pacote:
 
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml, class-diagram
+#import "@preview/classcraft:0.1.0": setup-classuml, class-diagram
 ```
 
 // ===========================================================================
@@ -81,7 +81,7 @@ em documentos onde você quer mostrar exemplos de código sem renderizá-los —
 prefira a função direta nesses casos.*
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml
+#import "@preview/classcraft:0.1.0": setup-classuml
 #show: setup-classuml
 ```
 
@@ -115,7 +115,7 @@ As linguagens suportadas são:
 Use a função diretamente para controlar parâmetros por diagrama:
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": class-diagram
+#import "@preview/classcraft:0.1.0": class-diagram
 
 #class-diagram(
   "class Foo { private Bar bar; }",
@@ -163,7 +163,7 @@ Em vez de colar código dentro do documento Typst, leia os arquivos `.java`
 ou `.cs` diretamente com `read()`:
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": class-diagram
+#import "@preview/classcraft:0.1.0": class-diagram
 
 #let src = (
   read("../tests/java/Alimentavel.java"),

@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Java Grammar
+// classcraft — Java Grammar
 // =============================================================================
 // Relation inference rules:
 //   1. A non-primitive field  → association  (label = field name)

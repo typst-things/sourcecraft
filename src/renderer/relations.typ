@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Relation Renderer
+// classcraft — Relation Renderer
 // =============================================================================
 // Draws UML relations (arrows, lines) between class boxes using CeTZ.
 

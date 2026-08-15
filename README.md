@@ -1,36 +1,36 @@
-# source-to-class-diagram
+# ClassCraft
 
-Geração de Diagramas de Classe UML a partir de código-fonte Java ou C# diretamente no Typst, construído sobre o engine CeTZ.
+Generate UML class diagrams directly in Typst from Java or C# source code, built on top of the CeTZ engine with pluggable grammars.
 
-## Visão Geral
+## Overview
 
-**source-to-class-diagram** é um pacote Typst que gera diagramas de classe UML de forma automática. O pacote:
+**classcraft** is a Typst package that automatically generates UML class diagrams. The package:
 
-- **Infere relacionamentos** (herança, implementação, associação, agregação, composição) a partir da leitura do código-fonte real.
-- **Renderiza** a caixa de classe com atributos, métodos e estereótipos (`«interface»`, `«enum»`, `«abstract»`).
-- **Posiciona** as classes em um layout automático com suporte a posicionamento manual via anotação `@Layout`.
-- **Escala** o diagrama para caber na largura disponível e, opcionalmente, em uma altura máxima definida.
+- **Infers relationships** (inheritance, implementation, association, aggregation, composition) by reading the actual source code.
+- **Renders** the class box with attributes, methods and stereotypes (`«interface»`, `«enum»`, `«abstract»`).
+- **Positions** classes using an automatic layout with support for manual positioning via the `@Layout` annotation.
+- **Scales** the diagram to fit the available width and, optionally, a defined maximum height.
 
-## Instalação
+## Installation
 
-Adicione o pacote ao seu projeto Typst:
+Add the package to your Typst project:
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml, class-diagram
+#import "@preview/classcraft:0.1.0": setup-classuml, class-diagram
 ```
 
-## Formas de Uso
+## Usage
 
 ### 1. Via code fences (show-rule)
 
-Ative o interceptador de code fences com `setup-classuml`:
+Enable the code-fence interceptor with `setup-classuml`:
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml
+#import "@preview/classcraft:0.1.0": setup-classuml
 #show: setup-classuml
 ```
 
-Em seguida, use blocos de código com a linguagem correspondente:
+Then use code blocks with the corresponding language:
 
 ````typst
 ```class-diagram-java
@@ -42,12 +42,12 @@ class Produto {
 ```
 ````
 
-### 2. Via função `class-diagram`
+### 2. Via the `class-diagram` function
 
-Use a função diretamente para controlar parâmetros por diagrama:
+Use the function directly to control parameters per diagram:
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": class-diagram
+#import "@preview/classcraft:0.1.0": class-diagram
 
 #class-diagram(
   "class Foo { private Bar bar; }",
@@ -56,16 +56,16 @@ Use a função diretamente para controlar parâmetros por diagrama:
 )
 ```
 
-#### Exemplo Renderizado
+#### Rendered Example
 
 ![Produto e Estoque](gallery/produto_estoque.png)
 
-## Importando Arquivos de Código-Fonte
+## Importing Source-Code Files
 
-Você pode ler arquivos `.java` ou `.cs` diretamente com a função `read()` do Typst, mantendo o diagrama sincronizado com seu código real.
+You can read `.java` or `.cs` files directly with Typst's `read()` function, keeping the diagram in sync with your real code.
 
 ```typst
-#import "@preview/source-to-class-diagram:0.1.0": class-diagram
+#import "@preview/classcraft:0.1.0": class-diagram
 
 #let src = (
   read("src/model/Animal.java"),
@@ -77,13 +77,13 @@ Você pode ler arquivos `.java` ou `.cs` diretamente com a função `read()` do 
 #class-diagram(src, grammar: "java")
 ```
 
-#### Exemplo com Import Simplificado
+#### Example with Simplified Import
 
 ![Diagrama Animal](gallery/diagrama_animal.png)
 
-### Injetando Layout
+### Injecting Layout
 
-Você pode intercalar anotações `@Layout` sem modificar os arquivos fonte:
+You can interleave `@Layout` annotations without modifying the source files:
 
 ```typst
 #let src = (
@@ -100,23 +100,23 @@ Você pode intercalar anotações `@Layout` sem modificar os arquivos fonte:
 
 ![Diagrama com Layout Customizado](gallery/example_layout.png)
 
-## Controle de Tamanho
+## Size Control
 
-- **Ajuste à largura (`fit`)**: Por padrão (`true`), o diagrama escala para caber na página.
-- **Altura máxima (`max-height`)**: Limita a altura do diagrama para evitar quebras de página.
+- **Fit to width (`fit`)**: By default (`true`), the diagram scales to fit the page.
+- **Maximum height (`max-height`)**: Limits the diagram height to avoid page breaks.
 
 ```typst
 #class-diagram(src, grammar: "java", max-height: 12cm)
 ```
 
-## Posicionamento com `@Layout`
+## Positioning with `@Layout`
 
-Use para forçar a organização das classes no diagrama:
+Use it to force the organization of classes in the diagram:
 
-| Propriedade | Significado                       |
-| ----------- | --------------------------------- |
-| `level`     | Linha vertical (0 = topo)         |
-| `order`     | Posição horizontal (0 = esquerda) |
+| Property | Meaning                          |
+| -------- | -------------------------------- |
+| `level`  | Vertical row (0 = top)           |
+| `order`  | Horizontal position (0 = left)   |
 
 **Java:**
 
@@ -132,27 +132,27 @@ class Animal { ... }
 public class Animal { ... }
 ```
 
-## Inferência de Relacionamentos
+## Relationship Inference
 
-O pacote analisa o código e detecta:
+The package analyzes the code and detects:
 
-- **Herança/Implementação**: `extends`, `implements`, `:`.
-- **Associação**: Campos de tipos não-primitivos.
-- **Composição**: Detectada pelo uso de `new Foo()` dentro da classe.
-- **Agregação**: Detectada quando o tipo é recebido no construtor.
-- **Dependência**: Detectada por `throw new Exception()`.
+- **Inheritance/Implementation**: `extends`, `implements`, `:`.
+- **Association**: Fields of non-primitive types.
+- **Composition**: Detected by the use of `new Foo()` inside the class.
+- **Aggregation**: Detected when the type is received in the constructor.
+- **Dependency**: Detected by `throw new Exception()`.
 
 ## Enums
 
-Os valores de Enums são listados automaticamente:
+Enum values are listed automatically:
 ![Enum Porte](gallery/example_enum.png)
 
-## Criando Novas Gramáticas
+## Creating New Grammars
 
-O sistema é pluggável. Para adicionar uma nova linguagem:
+The system is pluggable. To add a new language:
 
-1. Crie o arquivo em `src/grammars/`.
-2. Implemente a função `parse(source) -> IR`.
-3. Registre no `mod.typ`.
+1. Create the file in `src/grammars/`.
+2. Implement the `parse(source) -> IR` function.
+3. Register it in `mod.typ`.
 
-Consulte o [Manual Completo](docs/manual.typ) para mais detalhes técnicos.
+See the [Complete Manual](docs/manual.typ) for more technical details.

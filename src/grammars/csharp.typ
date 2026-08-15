@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — C# Grammar
+// classcraft — C# Grammar
 // =============================================================================
 // Relation inference rules (same as Java grammar):
 //   1. A non-primitive field/property → association  (label = member name)

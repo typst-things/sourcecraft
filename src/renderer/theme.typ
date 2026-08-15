@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Theme System
+// classcraft — Theme System
 // =============================================================================
 // Visual theming for class diagrams.
 

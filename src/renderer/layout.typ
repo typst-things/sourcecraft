@@ -1,5 +1,5 @@
 // =============================================================================
-// source-to-class-diagram — Layout Engine
+// classcraft — Layout Engine
 // =============================================================================
 // Hierarchical grid layout with size-aware spacing.
 // Places parent classes at the top, children below, avoids overlap.

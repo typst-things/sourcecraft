@@ -1,4 +1,4 @@
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml
+#import "@preview/classcraft:0.1.0": setup-classuml
 
 #set page(paper: "a4")
 
@@ -9,7 +9,7 @@
 
 ````typ
 
-#import "@preview/source-to-class-diagram:0.1.0": setup-classuml
+#import "@preview/classcraft:0.1.0": setup-classuml
 
 #show: setup-classuml
 
