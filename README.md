@@ -4,7 +4,7 @@ Generate UML class diagrams directly in Typst from Java or C# source code, built
 
 ## Overview
 
-**sourcecraft** is a Typst package that automatically generates UML class diagrams. The package:
+**SourceCraft** is a Typst package that automatically generates UML class diagrams. The package:
 
 - **Infers relationships** (inheritance, implementation, association, aggregation, composition) by reading the actual source code.
 - **Renders** the class box with attributes, methods and stereotypes (`«interface»`, `«enum»`, `«abstract»`).
@@ -156,17 +156,3 @@ The system is pluggable. To add a new language:
 3. Register it in `mod.typ`.
 
 See the [Complete Manual](docs/manual.typ) for more technical details.
-
-## Migration from ClassCraft
-
-> **Breaking change:** \classcraft\ has been renamed to \sourcecraft\.
-
-| Old | New |
-|-----|-----|
-| \@preview/classcraft:0.1.0\ | \@preview/sourcecraft:0.1.0\ |
-| \setup-classuml\ | \setup-sourceuml\ |
-| \class-diagram\ | \source-diagram\ |
-| \class-diagram-java\ | \source-diagram-java\ |
-| \class-diagram-csharp\ | \source-diagram-csharp\ |
-
-Find & replace in your \.typ\ files to migrate.
