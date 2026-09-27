@@ -83,3 +83,13 @@
 
   (name: name, card: card)
 }
+
+/// Strip both single-line (// ...) and multi-line (/* ... */) comments from source code.
+#let strip-comments(source) = {
+  // Remove multi-line comments /* ... */
+  let no-block = source.replace(regex("(?s)/\\*.*?\\*/"), "")
+  // Remove single-line comments // ...
+  let no-line = no-block.replace(regex("//[^\n]*"), "")
+  no-line
+}
+

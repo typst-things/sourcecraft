@@ -1,5 +1,4 @@
-//#import "@preview/sourcecraft:0.1.0": source-diagram, setup-sourceuml
-#import "../src/lib.typ": source-diagram, setup-sourceuml
+#import "../src/lib.typ": setup-sourceuml, source-diagram
 #set page(paper: "a4", flipped: true)
 //#set page(width: auto)
 //#set page(width: 10cm)

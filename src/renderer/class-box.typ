@@ -21,7 +21,7 @@
   let member-content = {
     // Visibility symbol
     text(fill: vis-col, weight: "bold")[#vis-sym]
-    [ ]  // space
+    [ ] // space
 
     if member.kind == "method" {
       // Method: name(params): ReturnType
@@ -104,7 +104,7 @@
   rows.push(
     table.cell(fill: header-style.fill, align: center, inset: theme.padding)[
       #header-body
-    ]
+    ],
   )
 
   // Fields section
@@ -118,7 +118,7 @@
       }
     }
     rows.push(
-      table.cell(inset: theme.padding)[#fields-body]
+      table.cell(inset: theme.padding)[#fields-body],
     )
   }
 
@@ -133,7 +133,7 @@
       }
     }
     rows.push(
-      table.cell(inset: theme.padding)[#methods-body]
+      table.cell(inset: theme.padding)[#methods-body],
     )
   }
 

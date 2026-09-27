@@ -27,7 +27,7 @@
 #let _try-upgrade(field-rels, target, new-type) = {
   if target in field-rels {
     let existing = field-rels.at(target)
-    let cur  = _priority.at(existing.type,  default: 0)
+    let cur = _priority.at(existing.type, default: 0)
     let next = _priority.at(new-type, default: 0)
     if next > cur {
       let updated = field-rels
@@ -46,15 +46,16 @@
 // ---------------------------------------------------------------------------
 
 #let parse(source) = {
-  let lines = source.split("\n")
+  let clean-source = putils.strip-comments(source)
+  let lines = clean-source.split("\n")
 
-  let classes   = ()
+  let classes = ()
   let relations = ()
-  let packages  = ()
+  let packages = ()
 
-  let current-class   = none
+  let current-class = none
   let current-members = ()
-  let brace-depth     = 0
+  let brace-depth = 0
 
   let layout-level = none
   let layout-order = none
@@ -84,7 +85,7 @@
         throw-targets.push(target)
         relations.push(ir.uml-relation(
           from: current-class.name,
-          to:   target,
+          to: target,
           type: "dependency",
         ))
       }
@@ -100,13 +101,16 @@
           rest = rest.slice(vis-match.end).trim()
         }
 
-        let modifiers  = ()
+        let modifiers = ()
         let keep-going = true
         while keep-going {
-          if rest.starts-with("static ")        { modifiers.push("static");   rest = rest.slice(7).trim() }
-          else if rest.starts-with("abstract ") { modifiers.push("abstract"); rest = rest.slice(9).trim() }
-          else if rest.starts-with("final ")    {                             rest = rest.slice(6).trim() }
-          else { keep-going = false }
+          if rest.starts-with("static ") {
+            modifiers.push("static")
+            rest = rest.slice(7).trim()
+          } else if rest.starts-with("abstract ") {
+            modifiers.push("abstract")
+            rest = rest.slice(9).trim()
+          } else if rest.starts-with("final ") { rest = rest.slice(6).trim() } else { keep-going = false }
         }
 
         let is-method = rest.contains("(")
@@ -115,7 +119,7 @@
           let pre-paren-match = rest.match(regex("^([^(]+)"))
           if pre-paren-match != none {
             let pre-paren = pre-paren-match.text.trim()
-            let parts     = pre-paren.split(regex("\\s+"))
+            let parts = pre-paren.split(regex("\\s+"))
 
             if parts.len() == 1 and parts.at(0) == current-class.name {
               // ── Constructor ────────────────────────────────────────────────
@@ -123,20 +127,20 @@
               if paren-inside != none and paren-inside.trim() != "" {
                 let params-str = paren-inside.trim()
                 current-members.push(ir.uml-member(
-                  name:        current-class.name,
+                  name: current-class.name,
                   return-type: none,
-                  visibility:  visibility,
-                  modifiers:   modifiers,
-                  kind:        "method",
-                  params:      params-str,
+                  visibility: visibility,
+                  modifiers: modifiers,
+                  kind: "method",
+                  params: params-str,
                 ))
                 // Rule 3: constructor params of non-primitive types
                 //         promote the field's association to aggregation.
                 for p in params-str.split(",") {
                   let p-words = p.trim().split(regex("\\s+"))
                   if p-words.len() >= 2 {
-                    let raw-type  = p-words.at(0)
-                    let inner-m   = raw-type.match(regex("<([A-Z][\\w.]*)>"))
+                    let raw-type = p-words.at(0)
+                    let inner-m = raw-type.match(regex("<([A-Z][\\w.]*)>"))
                     let type-name = if inner-m != none {
                       inner-m.captures.at(0)
                     } else {
@@ -149,27 +153,26 @@
                 }
               } else {
                 current-members.push(ir.uml-member(
-                  name:        current-class.name,
+                  name: current-class.name,
                   return-type: none,
-                  visibility:  visibility,
-                  modifiers:   modifiers,
-                  kind:        "method",
-                  params:      none,
+                  visibility: visibility,
+                  modifiers: modifiers,
+                  kind: "method",
+                  params: none,
                 ))
               }
-
             } else if parts.len() >= 2 {
               // ── Regular method ─────────────────────────────────────────────
-              let name        = parts.last()
+              let name = parts.last()
               let return-type = parts.slice(0, parts.len() - 1).join(" ")
-              let params-str  = putils.extract-between(rest, "(", ")")
+              let params-str = putils.extract-between(rest, "(", ")")
               current-members.push(ir.uml-member(
-                name:        name,
+                name: name,
                 return-type: return-type,
-                visibility:  visibility,
-                modifiers:   modifiers,
-                kind:        "method",
-                params:      if params-str != "" { params-str } else { none },
+                visibility: visibility,
+                modifiers: modifiers,
+                kind: "method",
+                params: if params-str != "" { params-str } else { none },
               ))
             }
           }
@@ -187,13 +190,13 @@
 
           let parts = rest.split(regex("\\s+"))
           if parts.len() >= 2 {
-            let name        = parts.last()
+            let name = parts.last()
             let return-type = parts.slice(0, parts.len() - 1).join(" ")
 
             // For generic types like List<Class2>, the *meaningful* target is
             // the inner type (Class2), not the collection wrapper (List).
             // Extract the inner type when present; fall back to clean-type.
-            let inner-match  = return-type.match(regex("<([A-Z][\\w.]*)>"))
+            let inner-match = return-type.match(regex("<([A-Z][\\w.]*)>"))
             let assoc-target = if inner-match != none {
               inner-match.captures.at(0)
             } else {
@@ -208,20 +211,20 @@
             }
 
             current-members.push(ir.uml-member(
-              name:        name,
+              name: name,
               return-type: return-type,
-              visibility:  visibility,
-              modifiers:   modifiers,
-              kind:        "field",
+              visibility: visibility,
+              modifiers: modifiers,
+              kind: "field",
             ))
           } else if parts.len() == 1 and current-class.type == "enum" and parts.at(0) != "" {
             // Enum constant: single identifier with no type (e.g. PEQUENO, MEDIO)
             current-members.push(ir.uml-member(
-              name:        parts.at(0),
+              name: parts.at(0),
               return-type: none,
-              visibility:  "public",
-              modifiers:   (),
-              kind:        "field",
+              visibility: "public",
+              modifiers: (),
+              kind: "field",
             ))
           }
         }
@@ -249,16 +252,16 @@
           // Inline flush of field-rels → relations
           for (target, rel) in field-rels {
             relations.push(ir.uml-relation(
-              from:  current-class.name,
-              to:    target,
-              type:  rel.type,
+              from: current-class.name,
+              to: target,
+              type: rel.type,
               label: rel.label,
             ))
           }
 
-          current-class   = none
+          current-class = none
           current-members = ()
-          field-rels      = (:)
+          field-rels = (:)
         }
       }
 
@@ -271,7 +274,7 @@
 
     let layout-match = line.match(regex("^@Layout\\s*\\((.*)\\)"))
     if layout-match != none {
-      let params  = layout-match.captures.at(0)
+      let params = layout-match.captures.at(0)
       let level-m = params.match(regex("level\\s*=\\s*(\\d+)"))
       let order-m = params.match(regex("order\\s*=\\s*(\\d+)"))
       if level-m != none { layout-level = int(level-m.captures.at(0)) }
@@ -279,23 +282,23 @@
       continue
     }
 
-    let m = line.match(regex(
-      "^(?:(public|protected|private|package)\\s+)?(?:(abstract)\\s+)?(class|interface|enum|@interface)\\s+([A-Z][\\w.]*)"
-    ))
+    let m = line.match(
+      regex(
+        "^(?:(public|protected|private|package)\\s+)?(?:(abstract)\\s+)?(class|interface|enum|@interface)\\s+([A-Z][\\w.]*)",
+      ),
+    )
     if m != none {
       let is-abstract = m.captures.at(1) != none
-      let keyword     = m.captures.at(2)
-      let name        = m.captures.at(3)
-      let cls-type    = if is-abstract               { "abstract"   }
-                        else if keyword == "@interface" { "annotation" }
-                        else                           { keyword      }
+      let keyword = m.captures.at(2)
+      let name = m.captures.at(3)
+      let cls-type = if is-abstract { "abstract" } else if keyword == "@interface" { "annotation" } else { keyword }
 
       let cls = ir.uml-class(name: name, type: cls-type, level: layout-level, order: layout-order)
-      current-class   = cls
+      current-class = cls
       current-members = ()
-      field-rels      = (:)
-      layout-level    = none
-      layout-order    = none
+      field-rels = (:)
+      layout-level = none
+      layout-order = none
 
       // Inheritance / implementation
       let after-name = line.slice(m.end)
@@ -304,7 +307,7 @@
       if extends-match != none {
         relations.push(ir.uml-relation(
           from: name,
-          to:   extends-match.captures.at(0),
+          to: extends-match.captures.at(0),
           type: "inheritance",
         ))
       }
@@ -325,7 +328,7 @@
           if ch == "{" { brace-depth += 1 }
           if ch == "}" { brace-depth -= 1 }
         }
-        brace-depth -= 1   // adjust the initial +1 assumption
+        brace-depth -= 1 // adjust the initial +1 assumption
 
         if brace-depth == 0 {
           // Inline / empty class — flush immediately
@@ -333,14 +336,14 @@
           classes.push(current-class)
           for (target, rel) in field-rels {
             relations.push(ir.uml-relation(
-              from:  current-class.name,
-              to:    target,
-              type:  rel.type,
+              from: current-class.name,
+              to: target,
+              type: rel.type,
               label: rel.label,
             ))
           }
           current-class = none
-          field-rels    = (:)
+          field-rels = (:)
         }
       } else {
         classes.push(cls)

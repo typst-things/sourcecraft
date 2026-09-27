@@ -1,4 +1,3 @@
-//#import "@preview/sourcecraft:0.1.0": setup-sourceuml
 #import "../src/lib.typ": setup-sourceuml
 
 #set page(paper: "a4", flipped: true)
@@ -19,11 +18,17 @@ public enum Porte
 }
 
 
+/// <summary>
+/// XML Documentation comment for interface
+/// </summary>
 public interface IInterface1
 {
-    void Method1();
+    void Method1(); // Inline comment on interface method
 }
 
+/* Multi-line comment block
+   testing comment resilience
+*/
 public class MiniTeste : IInterface1
 {
     public void Method1()
@@ -33,7 +38,8 @@ public class MiniTeste : IInterface1
 
     private void Method2()
     {
-        // Implementação
+        /* Block comment inside method */
+        string url = "http://example.com/test"; // Inline comment after string with //
     }
 }
 

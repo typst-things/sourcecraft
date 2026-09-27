@@ -25,14 +25,14 @@
 ///   so the diagram never pushes content onto the next page.
 #let _render-diagram(
   source,
-  grammar:    "java",
-  theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
-  fit:        true,
+  grammar: "java",
+  theme: auto,
+  spacing: (x: 4.0, y: 3.5),
+  fit: true,
   max-height: none,
 ) = {
   let diagram-ir = parser.parse(source, grammar: grammar)
-  let result     = renderer.render(diagram-ir, theme: theme, spacing: spacing)
+  let result = renderer.render(diagram-ir, theme: theme, spacing: spacing)
 
   if fit or max-height != none {
     layout(bounds => context {
@@ -58,11 +58,11 @@
         // Scale the content AND tell Typst the box is the scaled size so it
         // doesn't over-allocate vertical space (which would cause a page break).
         box(
-          width:  size.width  * factor,
+          width: size.width * factor,
           height: size.height * factor,
           scale(
-            x:      factor * 100%,
-            y:      factor * 100%,
+            x: factor * 100%,
+            y: factor * 100%,
             origin: top + left,
             result,
           ),
@@ -95,19 +95,17 @@
 /// ```
 /// ````
 #let setup-sourceuml(
-  theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
-  fit:        true,
+  theme: auto,
+  spacing: (x: 4.0, y: 3.5),
+  fit: true,
   max-height: none,
   doc,
 ) = {
   show raw.where(lang: "source-diagram-java"): it => {
-    _render-diagram(it.text, grammar: "java", theme: theme, spacing: spacing,
-      fit: fit, max-height: max-height)
+    _render-diagram(it.text, grammar: "java", theme: theme, spacing: spacing, fit: fit, max-height: max-height)
   }
   show raw.where(lang: "source-diagram-csharp"): it => {
-    _render-diagram(it.text, grammar: "csharp", theme: theme, spacing: spacing,
-      fit: fit, max-height: max-height)
+    _render-diagram(it.text, grammar: "csharp", theme: theme, spacing: spacing, fit: fit, max-height: max-height)
   }
   doc
 }
@@ -126,14 +124,13 @@
 /// - max-height (length or none): maximum allowed height; scales down if exceeded
 #let source-diagram(
   source,
-  grammar:    "java",
-  theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
-  fit:        true,
+  grammar: "java",
+  theme: auto,
+  spacing: (x: 4.0, y: 3.5),
+  fit: true,
   max-height: none,
 ) = {
-  _render-diagram(source, grammar: grammar, theme: theme,
-    spacing: spacing, fit: fit, max-height: max-height)
+  _render-diagram(source, grammar: grammar, theme: theme, spacing: spacing, fit: fit, max-height: max-height)
 }
 
 // =============================================================================
