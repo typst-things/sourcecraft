@@ -52,6 +52,79 @@
   after.slice(0, end.start)
 }
 
+/// Split a parameter list without splitting commas inside generic arguments.
+#let split-top-level(text, delimiter: ",") = {
+  let parts = ()
+  let current = ""
+  let angle-depth = 0
+  let paren-depth = 0
+  let bracket-depth = 0
+
+  for ch in text.clusters() {
+    if ch == delimiter and angle-depth == 0 and paren-depth == 0 and bracket-depth == 0 {
+      parts.push(current.trim())
+      current = ""
+    } else {
+      current += ch
+      if ch == "<" { angle-depth += 1 }
+      if ch == ">" { angle-depth = calc.max(0, angle-depth - 1) }
+      if ch == "(" { paren-depth += 1 }
+      if ch == ")" { paren-depth = calc.max(0, paren-depth - 1) }
+      if ch == "[" { bracket-depth += 1 }
+      if ch == "]" { bracket-depth = calc.max(0, bracket-depth - 1) }
+    }
+  }
+
+  if current.trim() != "" { parts.push(current.trim()) }
+  parts
+}
+
+/// Return the non-primitive named types referenced by a Java/C# parameter.
+/// For generic types, inspect their arguments (including nested generics)
+/// rather than treating collection/container types as dependencies.
+#let parameter-types(parameter) = {
+  let declaration = parameter.split("=").at(0).trim()
+  let name-match = declaration.match(regex("[A-Za-z_$][\\w$]*\\s*$"))
+  if name-match == none { return () }
+
+  let type-text = declaration.slice(0, name-match.start).trim()
+  let words = type-text.split(regex("\\s+"))
+  let modifiers = ("final", "ref", "out", "in", "params", "this", "scoped", "readonly")
+  let first-type = 0
+  while first-type < words.len() and words.at(first-type) in modifiers {
+    first-type += 1
+  }
+  type-text = words.slice(first-type).join(" ")
+
+  let targets = ()
+  let generic-parts = type-text.matches(regex("<([^<>]*)>"))
+  if generic-parts.len() > 0 {
+    for generic in generic-parts {
+      for argument in split-top-level(generic.captures.at(0)) {
+        let names = argument.split(regex("[^A-Za-z0-9_.$]+")).filter(name => name != "")
+        if names.len() > 0 {
+          let target = names.last()
+          if not is-primitive-type(target) and target not in targets {
+            targets.push(target)
+          }
+        }
+      }
+    }
+  } else {
+    let cleaned-type = type-text
+      .replace("...", "")
+      .replace("[]", "")
+      .replace("?", "")
+      .trim()
+    let target = cleaned-type.split(regex("\\s+")).last()
+    if target != "" and not is-primitive-type(target) {
+      targets.push(target)
+    }
+  }
+
+  targets
+}
+
 /// Extract stereotype text from <<Name>>.
 /// Returns the stereotype string or none.
 #let parse-stereotype(text) = {

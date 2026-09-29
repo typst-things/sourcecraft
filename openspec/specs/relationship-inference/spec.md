@@ -109,3 +109,25 @@ The system SHALL infer dependencies from `throw new ExceptionType()` statements.
 #### Scenario: C# throw dependency
 - **WHEN** parsing a method containing `throw new MyException()`
 - **THEN** a dependency relationship from the class to MyException is created
+
+The system SHALL infer dependencies from non-primitive types used by method
+parameters, including types nested in generic arguments. Commas inside generic
+arguments SHALL NOT be treated as parameter separators. If a type is already
+represented by a field relationship, the parser SHALL NOT add a duplicate
+dependency for that type.
+
+#### Scenario: Multiple generic method parameter types
+- **WHEN** parsing `void import(Map<String, Customer> customers)` or the equivalent C# declaration
+- **THEN** a dependency relationship from the containing class to Customer is created and no relationship to a malformed type name is created
+
+#### Scenario: Nested generic method parameter types
+- **WHEN** parsing `void process(Map<String, List<Customer>> customers)` or the equivalent C# declaration
+- **THEN** a dependency relationship from the containing class to Customer is created
+
+#### Scenario: Multiple custom generic arguments
+- **WHEN** parsing `void compare(Pair<Customer, Order> pair)`
+- **THEN** dependencies from the containing class to Customer and Order are created
+
+#### Scenario: Parameter type already represented by a field
+- **WHEN** a class has a field of type Customer and a method parameter of type Customer
+- **THEN** the parser emits the field relationship and does not emit a duplicate dependency to Customer

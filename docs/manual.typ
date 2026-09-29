@@ -2,7 +2,7 @@
 // sourcecraft — Manual
 // =============================================================================
 
-#import "@preview/sourcecraft:0.1.0": source-diagram, setup-sourceuml
+#import "../src/lib.typ": source-diagram, setup-sourceuml
 
 #set page(paper: "a4", margin: (x: 2cm, y: 2.5cm))
 #set text(font: "Segoe UI", size: 11pt)
@@ -17,7 +17,7 @@
       fill: luma(245),
       radius: 4pt,
       inset: (x: 10pt, y: 8pt),
-      text(font: "Cascadia Code", size: 9.5pt, it),
+      text(font: "Fira Code", size: 9.5pt, it),
     )
   } else {
     box(fill: luma(245), inset: (x: 3pt), outset: (y: 3pt), radius: 2pt, it)
@@ -286,7 +286,43 @@ O parser analisa o código-fonte e infere os relacionamentos UML automaticamente
   [`extends Foo`], [`: Foo`], [Herança (seta vazia)],
   [`implements IBar`], [`: IBar`], [Implementação (seta tracejada vazia)],
   [`throw new Exc()`], [`throw new Exc()`], [Dependência (seta tracejada)],
-  [`void m(Foo f)`], [`void M(Foo f)`], [Dependência rotulada com o nome do método (se `Foo` não for atributo)],
+  [`void m(Foo f)`], [`void M(Foo f)`], [Dependência rotulada com o nome do método (inclusive tipos em genéricos; se `Foo` não for atributo)],
+)
+
+== Dependências por parâmetros de método
+
+Tipos não primitivos usados como parâmetros de métodos geram dependências
+rotuladas com o nome do método. O parser também encontra tipos dentro de
+genéricos com vários argumentos e aninhados. Vírgulas dentro de `<...>` não
+separam parâmetros:
+
+```java
+class ImportService {
+  private Customer customer;
+
+  void importCustomers(Map<String, List<Customer>> customers) {}
+  void compare(Pair<Customer, Order> pair) {}
+}
+```
+
+O atributo `customer` já representa a relação com `Customer`; por isso, os
+métodos não criam uma segunda dependência para esse tipo. `Order`, usado apenas
+como argumento de `Pair`, gera uma dependência rotulada `compare`.
+
+O mesmo comportamento vale para C\#:
+
+```csharp
+class ImportService {
+  private Customer customer;
+
+  void ImportCustomers(Dictionary<string, List<Customer>> customers) {}
+  void Compare(Pair<Customer, Order> pair) {}
+}
+```
+
+#source-diagram(
+  "class ImportService {\n  private Customer customer;\n  void importCustomers(Map<String, List<Customer>> customers) {}\n  void compare(Pair<Customer, Order> pair) {}\n}\n",
+  grammar: "java",
 )
 
 == Associação, Agregação e Composição
@@ -308,7 +344,7 @@ no comportamento do código:
 A promoção *nunca desce de nível*: `associação → composição → agregação`.
 
 *Exemplo:*
-```java
+```source-diagram-java
 class Pedido {
   private List<Item> itens;     // associação Pedido → Item (label: "itens")
                                 // List<Item>: target é Item, não List
@@ -453,4 +489,3 @@ for (target, rel) in field-rels {
   relations.push(ir.uml-relation(...))
 }
 ```
-

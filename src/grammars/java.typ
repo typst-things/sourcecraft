@@ -137,17 +137,9 @@
                 ))
                 // Rule 3: constructor params of non-primitive types
                 //         promote the field's association to aggregation.
-                for p in params-str.split(",") {
-                  let p-words = p.trim().split(regex("\\s+"))
-                  if p-words.len() >= 2 {
-                    let raw-type  = p-words.at(0)
-                    let inner-m   = raw-type.match(regex("<([A-Z][\\w.]*)>"))
-                    let type-name = if inner-m != none {
-                      inner-m.captures.at(0)
-                    } else {
-                      raw-type.replace(regex("<.*>"), "").replace("[]", "")
-                    }
-                    if not putils.is-primitive-type(type-name) {
+                for p in putils.split-top-level(params-str) {
+                  for type-name in putils.parameter-types(p) {
+                    if type-name != current-class.name {
                       field-rels = _try-upgrade(field-rels, type-name, "aggregation")
                     }
                   }
@@ -178,16 +170,8 @@
               ))
               // Rule 4: non-primitive method parameters → dependency candidates
               if params-str != none and params-str.trim() != "" {
-                for p in params-str.split(",") {
-                  let p-words = p.trim().split(regex("\\s+")).filter(w => w != "final")
-                  if p-words.len() >= 2 {
-                    let raw-type  = p-words.at(0)
-                    let inner-m   = raw-type.match(regex("<([A-Z][\\w.]*)>"))
-                    let type-name = if inner-m != none {
-                      inner-m.captures.at(0)
-                    } else {
-                      raw-type.replace(regex("<.*>"), "").replace("[]", "").replace("...", "")
-                    }
+                for p in putils.split-top-level(params-str) {
+                  for type-name in putils.parameter-types(p) {
                     if (not putils.is-primitive-type(type-name)
                         and type-name != current-class.name
                         and type-name not in dep-rels) {
@@ -281,7 +265,8 @@
             ))
           }
 
-          // Inline flush of dep-rels → dependency (only if not already a field relation)
+          // A method parameter that is already represented by a field relation
+          // does not add a second, weaker relationship.
           for (target, label) in dep-rels {
             if target not in field-rels {
               relations.push(ir.uml-relation(

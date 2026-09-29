@@ -140,7 +140,29 @@ The package analyzes the code and detects:
 - **Association**: Fields of non-primitive types.
 - **Composition**: Detected by the use of `new Foo()` inside the class.
 - **Aggregation**: Detected when the type is received in the constructor.
-- **Dependency**: Detected by `throw new Exception()` and by method parameters whose type is not a field of the class (label = method name).
+- **Dependency**: Detected by `throw new Exception()` and by non-primitive types used in method parameters (label = method name). Generic arguments, including nested and multi-type generics, are analyzed; types already represented by fields do not produce a duplicate dependency.
+
+```java
+class ImportService {
+  private Customer customer;
+
+  void importCustomers(Map<String, List<Customer>> customers) {}
+  void compare(Pair<Customer, Order> pair) {}
+}
+```
+
+`ImportService` has an association to `Customer` from its field, so the method parameter does not add a duplicate dependency to `Customer`. The generic parameters also infer dependencies to `Order` (from `Pair<Customer, Order>`) and to other non-primitive types used only as method parameters.
+
+The same inference applies to C#:
+
+```csharp
+class ImportService {
+  private Customer customer;
+
+  void ImportCustomers(Dictionary<string, List<Customer>> customers) {}
+  void Compare(Pair<Customer, Order> pair) {}
+}
+```
 
 ## Enums
 
