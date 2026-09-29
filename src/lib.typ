@@ -55,17 +55,16 @@
       let factor = calc.min(fw, fh)
 
       if factor < 1.0 {
-        // Scale the content AND tell Typst the box is the scaled size so it
-        // doesn't over-allocate vertical space (which would cause a page break).
-        box(
-          width:  size.width  * factor,
-          height: size.height * factor,
-          scale(
-            x:      factor * 100%,
-            y:      factor * 100%,
-            origin: top + left,
-            result,
-          ),
+        // `reflow: true` makes the layout size match the scaled size, so the
+        // diagram neither over-allocates vertical space (page breaks) nor gets
+        // shifted out of its box when the surrounding alignment is centered
+        // (e.g. inside `figure`).
+        scale(
+          x:      factor * 100%,
+          y:      factor * 100%,
+          origin: top + left,
+          reflow: true,
+          result,
         )
       } else {
         result

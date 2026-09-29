@@ -286,6 +286,7 @@ O parser analisa o código-fonte e infere os relacionamentos UML automaticamente
   [`extends Foo`], [`: Foo`], [Herança (seta vazia)],
   [`implements IBar`], [`: IBar`], [Implementação (seta tracejada vazia)],
   [`throw new Exc()`], [`throw new Exc()`], [Dependência (seta tracejada)],
+  [`void m(Foo f)`], [`void M(Foo f)`], [Dependência rotulada com o nome do método (se `Foo` não for atributo)],
 )
 
 == Associação, Agregação e Composição

@@ -5,6 +5,7 @@
 //   1. A non-primitive field/property → association  (label = member name)
 //   2. `new X()` anywhere in class body → promotes association → composition
 //   3. Constructor parameter of type X  → promotes association → aggregation
+//   4. Method parameter of type X (not a field) → dependency (label = method name)
 //
 // Priority: aggregation (2) > composition (1) > association (0)
 // Promotions never downgrade an existing relation.
@@ -61,6 +62,10 @@
 
   // Per-class accumulator: target-class-name → (label: str, type: str)
   let field-rels = (:)
+
+  // Per-class accumulator: target-class-name → label (method name).
+  // Types used only as method parameters become dependencies at flush time.
+  let dep-rels = (:)
 
   for raw-line in lines {
     let line = raw-line.trim()
@@ -189,6 +194,26 @@
                 kind:        "method",
                 params:      if params-str != "" { params-str } else { none },
               ))
+              // Rule 4: non-primitive method parameters → dependency candidates
+              if params-str != none and params-str.trim() != "" {
+                for p in params-str.split(",") {
+                  let p-words = p.trim().split(regex("\\s+")).filter(w => w not in ("ref", "out", "in", "params"))
+                  if p-words.len() >= 2 {
+                    let raw-type  = p-words.at(0)
+                    let inner-m   = raw-type.match(regex("<([A-Z][\\w.]*)>"))
+                    let type-name = if inner-m != none {
+                      inner-m.captures.at(0)
+                    } else {
+                      raw-type.replace(regex("<.*>"), "").replace("[]", "").replace("?", "")
+                    }
+                    if (not putils.is-primitive-type(type-name)
+                        and type-name != current-class.name
+                        and type-name not in dep-rels) {
+                      dep-rels.insert(type-name, name)
+                    }
+                  }
+                }
+              }
             }
           }
         } else {
@@ -274,9 +299,22 @@
             ))
           }
 
+          // Inline flush of dep-rels → dependency (only if not already a field relation)
+          for (target, label) in dep-rels {
+            if target not in field-rels {
+              relations.push(ir.uml-relation(
+                from:  current-class.name,
+                to:    target,
+                type:  "dependency",
+                label: label,
+              ))
+            }
+          }
+
           current-class   = none
           current-members = ()
           field-rels      = (:)
+          dep-rels        = (:)
         }
       }
 
@@ -327,6 +365,7 @@
       current-class   = cls
       current-members = ()
       field-rels      = (:)
+      dep-rels        = (:)
       layout-level    = none
       layout-order    = none
 

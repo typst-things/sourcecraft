@@ -140,7 +140,7 @@ The package analyzes the code and detects:
 - **Association**: Fields of non-primitive types.
 - **Composition**: Detected by the use of `new Foo()` inside the class.
 - **Aggregation**: Detected when the type is received in the constructor.
-- **Dependency**: Detected by `throw new Exception()`.
+- **Dependency**: Detected by `throw new Exception()` and by method parameters whose type is not a field of the class (label = method name).
 
 ## Enums
 
