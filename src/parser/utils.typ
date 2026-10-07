@@ -156,3 +156,65 @@
 
   (name: name, card: card)
 }
+
+/// Remove `//` line comments and `/* ... */` block comments (Javadoc and
+/// `///` XML docs included) from Java/C# source.
+///
+/// - String and char literals are respected, so `"http://x"` or `'/'` never
+///   start a comment. Their contents are blanked (`"..."` → `""`), so braces
+///   or `new X(` inside a string cannot confuse the brace-based parser.
+/// - C# verbatim strings (`@"..."`, where `""` is an escaped quote) are handled.
+/// - Newlines are preserved, so the line structure of the source is kept.
+#let strip-comments(source) = {
+  let out = ()
+  let mode = "code" // code | line | block | string | verbatim | char
+  let prev = ""     // previous cluster (code mode only)
+  let skip = false  // second char of a two-char token already consumed
+  let chars = source.clusters()
+  let n = chars.len()
+
+  for i in range(n) {
+    if skip { skip = false; continue }
+    let ch = chars.at(i)
+    let next = if i + 1 < n { chars.at(i + 1) } else { "" }
+
+    if mode == "code" {
+      if ch == "/" and next == "/" {
+        mode = "line"; skip = true
+      } else if ch == "/" and next == "*" {
+        mode = "block"; skip = true
+        out.push(" ") // keep tokens around the comment apart
+      } else if ch == "\"" {
+        mode = if prev == "@" or (prev == "$" and i >= 2 and chars.at(i - 2) == "@") { "verbatim" } else { "string" }
+        out.push(ch)
+      } else if ch == "'" {
+        mode = "char"; out.push(ch)
+      } else {
+        out.push(ch)
+      }
+      prev = ch
+    } else if mode == "line" {
+      if ch == "\n" or ch == "\r\n" { mode = "code"; prev = ""; out.push(ch) }
+    } else if mode == "block" {
+      if ch == "*" and next == "/" { mode = "code"; skip = true; prev = "" }
+      else if ch == "\n" or ch == "\r\n" { out.push(ch) }
+    } else if mode == "string" or mode == "char" {
+      let quote = if mode == "string" { "\"" } else { "'" }
+      if ch == "\\" {
+        // Escape sequence: drop the escaped char too (unless it is a newline)
+        if next != "\n" and next != "\r\n" { skip = true }
+      } else if ch == quote {
+        mode = "code"; prev = ""; out.push(ch)
+      } else if ch == "\n" or ch == "\r\n" {
+        // Unterminated literal (or Java text block): keep the line structure
+        out.push(ch)
+      }
+    } else if mode == "verbatim" {
+      if ch == "\"" and next == "\"" { skip = true }
+      else if ch == "\"" { mode = "code"; prev = ""; out.push(ch) }
+      else if ch == "\n" or ch == "\r\n" { out.push(ch) }
+    }
+  }
+
+  out.join()
+}

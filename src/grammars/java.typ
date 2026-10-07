@@ -47,7 +47,8 @@
 // ---------------------------------------------------------------------------
 
 #let parse(source) = {
-  let lines = source.split("\n")
+  // Comments must never reach the line-based parser below
+  let lines = putils.strip-comments(source).split("\n")
 
   let classes   = ()
   let relations = ()
@@ -70,7 +71,7 @@
 
   for raw-line in lines {
     let line = raw-line.trim()
-    if line == "" or line.starts-with("//") { continue }
+    if line == "" { continue }
 
     // -----------------------------------------------------------------------
     // Inside a class body
