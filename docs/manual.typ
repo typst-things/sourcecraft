@@ -133,7 +133,7 @@ Parâmetros disponíveis:
   [*Parâmetro*], [*Padrão*], [*Descrição*],
   [`grammar`], [`"java"`], [Grammar: `"java"` ou `"csharp"`],
   [`theme`], [`auto`], [Tema visual],
-  [`spacing`], [`(x: 4.0, y: 3.5)`], [Espaçamento entre caixas em unidades CeTZ],
+  [`spacing`], [`(x: 2.0, y: 2.0)`], [Distância entre as bordas das caixas em unidades CeTZ (`x` horizontal, `y` vertical). Aceita também um número único ou só uma das chaves. Mínimo efetivo: `0.6` (espaço para a ponta das setas)],
   [`fit`], [`true`], [Escalar para caber na largura da página],
   [`max-height`], [`none`], [Altura máxima; o diagrama é reduzido se exceder],
 )

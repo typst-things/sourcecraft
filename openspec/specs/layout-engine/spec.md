@@ -56,8 +56,8 @@ The system SHALL allow configuring horizontal and vertical spacing between class
 
 #### Scenario: Custom spacing via API
 - **WHEN** calling `class-diagram` with `spacing: (x: 6.0, y: 5.0)`
-- **THEN** class boxes have 6.0 CeTZ units horizontal and 5.0 vertical spacing
+- **THEN** class boxes have a 6.0 CeTZ units horizontal and 5.0 vertical gap between their edges
 
 #### Scenario: Default spacing
 - **WHEN** no spacing is specified
-- **THEN** default spacing of (x: 4.0, y: 3.5) is used
+- **THEN** default spacing of (x: 2.0, y: 2.0) is used (gap between box edges)

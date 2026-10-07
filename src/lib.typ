@@ -27,7 +27,7 @@
   source,
   grammar:    "java",
   theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
+  spacing:    (x: 2.0, y: 2.0),
   fit:        true,
   max-height: none,
 ) = {
@@ -95,7 +95,7 @@
 /// ````
 #let setup-sourceuml(
   theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
+  spacing:    (x: 2.0, y: 2.0),
   fit:        true,
   max-height: none,
   doc,
@@ -120,14 +120,14 @@
 /// - source (str): Source text in the specified grammar
 /// - grammar (str or function): "java" or "csharp"
 /// - theme (dict): Theme override (default: built-in theme)
-/// - spacing (dict): (x, y) spacing between classes
+/// - spacing (dict or number): gap between box edges in CeTZ units (x: horizontal, y: vertical)
 /// - fit (bool): scale to page width (default: true)
 /// - max-height (length or none): maximum allowed height; scales down if exceeded
 #let source-diagram(
   source,
   grammar:    "java",
   theme:      auto,
-  spacing:    (x: 4.0, y: 3.5),
+  spacing:    (x: 2.0, y: 2.0),
   fit:        true,
   max-height: none,
 ) = {

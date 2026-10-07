@@ -65,13 +65,31 @@
   ),
 )
 
+/// Point where the ray from a box center toward `target` leaves the box.
+///
+/// - center (tuple): (x, y) center of the box
+/// - size (dict): (w, h) size of the box
+/// - target (tuple): (x, y) point the ray points to
+#let _border-point(center, size, target) = {
+  let dx = target.at(0) - center.at(0)
+  let dy = target.at(1) - center.at(1)
+  if calc.abs(dx) < 1e-6 and calc.abs(dy) < 1e-6 { return center }
+  let tx = if calc.abs(dx) < 1e-6 { float.inf } else { (size.w / 2) / calc.abs(dx) }
+  let ty = if calc.abs(dy) < 1e-6 { float.inf } else { (size.h / 2) / calc.abs(dy) }
+  let t = calc.min(tx, ty)
+  (center.at(0) + dx * t, center.at(1) + dy * t)
+}
+
 /// Draw a single UML relation in the CeTZ canvas.
 ///
 /// - rel (dict): A uml-relation dictionary
 /// - from-pos (tuple): (x, y) position of the source class
 /// - to-pos (tuple): (x, y) position of the target class
 /// - theme (dict): The active theme
-#let draw-relation(rel, from-pos, to-pos, theme, positions, all-relations: ()) = {
+/// - sizes (dict or none): class-name → (w, h) box sizes in CeTZ units; when
+///   given, straight lines end exactly on the box borders (even when the
+///   boxes touch), instead of relying on CeTZ's border intersection.
+#let draw-relation(rel, from-pos, to-pos, theme, positions, all-relations: (), sizes: none) = {
   let is-bidi = all-relations.any(r => r.from == rel.to and r.to == rel.from)
   let style = _relation-styles.at(
     rel.type,
@@ -160,6 +178,10 @@
 
   let from-point = rel.from
   let to-point = rel.to
+  if sizes != none and rel.from in sizes and rel.to in sizes {
+    from-point = _border-point(from-pos, sizes.at(rel.from), to-pos)
+    to-point = _border-point(to-pos, sizes.at(rel.to), from-pos)
+  }
 
   if use-curve {
     if bridge {

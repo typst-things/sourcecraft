@@ -71,8 +71,11 @@
       text(size: theme.font.stereotype-size, style: "italic")[«#cls.stereotype»]
       linebreak()
     }
-    // Type indicator for interfaces/enums/annotations
-    if cls.type == "interface" {
+    // Type indicator for abstract classes/interfaces/enums/annotations
+    if cls.type == "abstract" {
+      text(size: theme.font.stereotype-size, style: "italic")[«abstract»]
+      linebreak()
+    } else if cls.type == "interface" {
       text(size: theme.font.stereotype-size, style: "italic")[«interface»]
       linebreak()
     } else if cls.type == "enum" {

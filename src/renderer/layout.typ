@@ -48,6 +48,29 @@
   calc.max(lines * 0.55 + 0.8, 2.0)
 }
 
+/// Default gap between class boxes, in CeTZ units.
+#let default-spacing = (x: 2.0, y: 2.0)
+
+/// Smallest allowed gap: room for a relation arrowhead (0.45) plus a bit of
+/// line, so arrows never disappear between touching boxes.
+#let min-gap = 0.6
+
+/// Normalize a user-supplied spacing value.
+/// Accepts a number (same gap on both axes), a dictionary with `x` and/or
+/// `y` (missing keys fall back to the defaults) or `auto`.
+#let normalize-spacing(spacing) = {
+  if spacing == auto or spacing == none { return default-spacing }
+  if type(spacing) == int or type(spacing) == float {
+    return (x: float(spacing), y: float(spacing))
+  }
+  assert(type(spacing) == dictionary,
+    message: "sourcecraft: `spacing` must be a number or a dictionary (x: .., y: ..), got " + repr(spacing))
+  (
+    x: float(spacing.at("x", default: default-spacing.x)),
+    y: float(spacing.at("y", default: default-spacing.y)),
+  )
+}
+
 /// Compute positions for all classes based on their relations.
 ///
 /// Strategy:
@@ -57,9 +80,13 @@
 /// 4. Distribute in a grid with enough room.
 ///
 /// - ir (dict): The full IR diagram
-/// - spacing (dict): (x: min-horizontal, y: min-vertical) spacing in CeTZ units
+/// - spacing (dict, number or auto): gap between box edges in CeTZ units
+///   (`x`: horizontal gap, `y`: vertical gap between levels)
+/// - sizes (dict or none): class-name → (w: float, h: float) real box sizes
+///   in CeTZ units. When none, sizes are estimated from the text length.
 /// Returns: Dictionary of class-name → (x, y) position.
-#let compute(ir, spacing: (x: 4.0, y: 3.5)) = {
+#let compute(ir, spacing: auto, sizes: none) = {
+  let spacing = normalize-spacing(spacing)
   let classes = ir.classes
   let relations = ir.relations
 
@@ -117,21 +144,16 @@
     if cls.level != none { levels.insert(cls.name, cls.level) }
   }
 
-  // --- 3. Estimate sizes and compute spacing ---
-  let max-width = 2.5
-  let max-height = 1.5
-  for cls in classes {
-    let w = _estimate-width(cls)
-    let h = _estimate-height(cls)
-    if w > max-width { max-width = w }
-    if h > max-height { max-height = h }
+  // --- 3. Box sizes and gaps ---
+  let box-size(cls) = if sizes != none and cls.name in sizes {
+    sizes.at(cls.name)
+  } else {
+    (w: _estimate-width(cls), h: _estimate-height(cls))
   }
 
-  // Actual spacing: at least (max-box-size + comfortable gap)
-  let gap-x = 2.0 // minimum gap between boxes
-  let gap-y = 2.0
-  let actual-sx = calc.max(spacing.x, max-width + gap-x)
-  let actual-sy = calc.max(spacing.y, max-height + gap-y)
+  // Gaps between box edges come straight from the user's spacing
+  let gap-x = calc.max(spacing.x, min-gap)
+  let gap-y = calc.max(spacing.y, min-gap)
 
   // --- 4. Group by level ---
   let max-level = 0
@@ -185,10 +207,10 @@
 
   // 5.3 Group classes into grid cells
   let cells = (:) // (col, level) -> [class_names]
-  let sizes = (:)
+  let box-sizes = (:)
   for cls in classes {
-    sizes.insert(cls.name, (w: _estimate-width(cls), h: _estimate-height(cls)))
-    
+    box-sizes.insert(cls.name, box-size(cls))
+
     let c = col-map.at(cls.name, default: 0)
     let l = levels.at(cls.name, default: 0)
     let key = str(c) + "," + str(l)
@@ -208,10 +230,10 @@
       let members = cells.at(key, default: ())
       let cw = 0.0
       if members.len() > 0 {
-        for m in members { cw += sizes.at(m).w }
-        cw += (members.len() - 1) * 1.5 // Internal padding between cell siblings
+        for m in members { cw += box-sizes.at(m).w }
+        cw += (members.len() - 1) * gap-x // Gap between cell siblings
       }
-      cell-width.insert(key, calc.max(cw, 2.0))
+      cell-width.insert(key, cw)
       if cw > max-w { max-w = cw }
     }
     col-max-width.insert(str(c), max-w)
@@ -230,7 +252,23 @@
     current-x += cw + gap-x
   }
 
-  // 5.6 Distribute coordinates
+  // 5.6 Row Y centers: each level is as tall as its tallest box,
+  // and consecutive levels are separated by exactly gap-y.
+  let row-height = range(max-level + 1).map(_ => 0.0)
+  for cls in classes {
+    let l = levels.at(cls.name, default: 0)
+    row-height.at(l) = calc.max(row-height.at(l), box-sizes.at(cls.name).h)
+  }
+  let row-center = ()
+  let current-y = 0.0
+  for level-idx in range(max-level + 1) {
+    let rh = row-height.at(level-idx)
+    row-center.push(current-y - rh / 2)
+    // Empty levels (possible with explicit layout levels) take no room
+    if rh > 0 { current-y -= rh + gap-y }
+  }
+
+  // 5.7 Distribute coordinates
   let positions = (:)
   for level-idx in range(max-level + 1) {
     for c in all-cols {
@@ -242,11 +280,11 @@
         let start-x = center-x - cw / 2
         
         for m in members {
-          let mw = sizes.at(m).w
+          let mw = box-sizes.at(m).w
           let kx = start-x + mw / 2
-          let ky = -level-idx * actual-sy
+          let ky = row-center.at(level-idx)
           positions.insert(m, (kx, ky))
-          start-x += mw + 1.5
+          start-x += mw + gap-x
         }
       }
     }
