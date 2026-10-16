@@ -1,4 +1,4 @@
-#import "@preview/sourcecraft:0.1.0": setup-sourceuml
+#import "@preview/sourcecraft:0.2.0": setup-sourceuml
 
 #set page(paper: "a4")
 
