@@ -109,3 +109,30 @@ The system SHALL allow registering new grammars by adding a parse function to th
 #### Scenario: Custom grammar function
 - **WHEN** passing a custom function as `grammar` parameter
 - **THEN** the custom function is used to parse the source
+### Requirement: Rust Grammar Parser
+
+The system SHALL parse Rust source code and extract structs, enums, traits, impl blocks, fields, methods, and relationships.
+
+#### Scenario: Map Rust items to IR class types
+- **WHEN** parsing a `struct`, an `enum` and a `trait`
+- **THEN** the IR contains a class, an enum and an interface respectively
+
+#### Scenario: Attach impl methods to their type
+- **WHEN** parsing `struct Foo; impl Foo { pub fn bar(&self) {} }`
+- **THEN** class `Foo` has a public method `bar`; methods without a `self` receiver are static
+
+#### Scenario: Trait implementation and supertraits
+- **WHEN** parsing `trait B {}`, `trait A: B {}` and `impl A for Foo {}`
+- **THEN** the IR contains an inheritance relation A → B and an implementation relation Foo → A
+
+#### Scenario: Ownership-aware field relations
+- **WHEN** a field has type `Box<Foo>` or `Vec<Foo>`, and another has type `&Bar` or `Rc<Bar>`
+- **THEN** the IR contains a composition to Foo and an aggregation to Bar
+
+#### Scenario: Ignore external types
+- **WHEN** a type implements `Display` or has fields of std types
+- **THEN** no relation is emitted to types not present in the source
+
+#### Scenario: Rust lexical edge cases
+- **WHEN** the source contains lifetimes (`'a`), char literals, raw strings or nested block comments
+- **THEN** they never alter the detected structure

@@ -6,11 +6,13 @@
 
 #import "java.typ"
 #import "csharp.typ"
+#import "rust.typ"
 
 /// Built-in grammars: name → parse function.
 #let builtin-grammars = (
   java:   java.parse,
   csharp: csharp.parse,
+  rust:   rust.parse,
 )
 
 /// Resolve a grammar by name (string) or accept a custom parse function.
