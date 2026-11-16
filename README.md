@@ -1,6 +1,6 @@
 # SourceCraft
 
-Generate UML class diagrams directly in Typst from Java or C# source code, built on top of the CeTZ engine with pluggable grammars.
+Generate UML class diagrams directly in Typst from Java, C# or Rust source code, built on top of the CeTZ engine with pluggable grammars.
 
 ## Overview
 
@@ -62,7 +62,7 @@ Use the function directly to control parameters per diagram:
 
 ## Importing Source-Code Files
 
-You can read `.java` or `.cs` files directly with Typst's `read()` function, keeping the diagram in sync with your real code.
+You can read `.java`, `.cs` or `.rs` files directly with Typst's `read()` function, keeping the diagram in sync with your real code.
 
 ```typst
 #import "@preview/sourcecraft:0.1.0": source-diagram
@@ -99,6 +99,36 @@ You can interleave `@Layout` annotations without modifying the source files:
 ```
 
 ![Diagrama com Layout Customizado](gallery/example_layout.png)
+
+### Rust
+
+Rust files work the same way (`grammar: "rust"` or the `source-diagram-rust` fence). Each `read()` keeps the diagram in sync with your crate:
+
+```typst
+#let src = (
+  read("src/model/animal.rs"),
+  read("src/model/cachorro.rs"),
+).join("\n\n")
+
+#source-diagram(src, grammar: "rust")
+```
+
+How Rust maps to UML:
+
+| Rust                      | UML                                                        |
+| ------------------------- | ---------------------------------------------------------- |
+| `struct`                  | class (fields = attributes; tuple fields are `0`, `1`, …)  |
+| `enum`                    | `«enum»` (variants listed as constants)                    |
+| `trait`                   | `«interface»` (required methods in italics)                |
+| `impl Type { … }`         | methods attached to `Type` (no `self` → underlined/static) |
+| `impl Trait for Type`     | implementation relation (traits defined in the source)     |
+| `trait A: B`              | inheritance relation (supertrait)                          |
+| `pub` / `pub(crate)` / —  | `+` / `~` / `-`                                            |
+| `mod x { … }`             | flattened into the diagram                                 |
+
+Relations are ownership-aware: owned fields (`Foo`, `Box<Foo>`, `Vec<Foo>`, `Option<Foo>`) become **composition**; fields behind `&`, `Rc`, `Arc`, `Weak` or raw pointers become **aggregation**; non-field method parameters become **dependency**. Enum variant payloads follow the same rules. Only types present in the parsed source generate relations, so `Display`, `Debug`, etc. never produce dangling arrows. Methods of impls of external traits (`Display`, `From`…) are omitted.
+
+Layout: `#[layout(level = 0, order = 1)]` (or `@Layout(level=0, order=1)` injected as a string between files).
 
 ## Size Control
 

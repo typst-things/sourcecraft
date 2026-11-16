@@ -107,6 +107,7 @@ As linguagens suportadas são:
   [*Fence language*], [*Gramática*],
   [`source-diagram-java`], [Código-fonte Java],
   [`source-diagram-csharp`], [Código-fonte C\#],
+  [`source-diagram-rust`], [Código-fonte Rust (`struct`, `enum`, `trait`, `impl`)],
 )
 
 
@@ -131,7 +132,7 @@ Parâmetros disponíveis:
   inset: 8pt,
   fill: (_, row) => if row == 0 { luma(230) } else { white },
   [*Parâmetro*], [*Padrão*], [*Descrição*],
-  [`grammar`], [`"java"`], [Grammar: `"java"` ou `"csharp"`],
+  [`grammar`], [`"java"`], [Grammar: `"java"`, `"csharp"` ou `"rust"`],
   [`theme`], [`auto`], [Tema visual],
   [`spacing`], [`(x: 2.0, y: 2.0)`], [Distância entre as bordas das caixas em unidades CeTZ (`x` horizontal, `y` vertical). Aceita também um número único ou só uma das chaves. Mínimo efetivo: `0.6` (espaço para a ponta das setas)],
   [`fit`], [`true`], [Escalar para caber na largura da página],

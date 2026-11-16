@@ -16,7 +16,7 @@
 
 /// Parse source code and render the class diagram.
 ///
-/// - grammar (str): "java" or "csharp"
+/// - grammar (str): "java", "csharp" or "rust"
 /// - fit (bool): scale down to fit page width (default: true)
 /// - max-height (length or none): if set, also scale down so the diagram
 ///   never exceeds this height.  Combined with `fit`, the smaller of the
@@ -108,6 +108,10 @@
     _render-diagram(it.text, grammar: "csharp", theme: theme, spacing: spacing,
       fit: fit, max-height: max-height)
   }
+  show raw.where(lang: "source-diagram-rust"): it => {
+    _render-diagram(it.text, grammar: "rust", theme: theme, spacing: spacing,
+      fit: fit, max-height: max-height)
+  }
   doc
 }
 
@@ -118,7 +122,7 @@
 /// Render a class diagram from source code.
 ///
 /// - source (str): Source text in the specified grammar
-/// - grammar (str or function): "java" or "csharp"
+/// - grammar (str or function): "java", "csharp" or "rust"
 /// - theme (dict): Theme override (default: built-in theme)
 /// - spacing (dict or number): gap between box edges in CeTZ units (x: horizontal, y: vertical)
 /// - fit (bool): scale to page width (default: true)
